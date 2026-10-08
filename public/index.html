@@ -1,0 +1,446 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reserva de recursos</title>
+<meta name="theme-color" content="#45358b">
+<link rel="icon" type="image/png" href="/favicon.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+<header class="topbar"><div class="in">
+  <img class="logo-img" src="/logo.png" alt="Logo ENS Justo José de Urquiza">
+  <div><div class="brand-name" id="school">Reserva de recursos</div><div class="brand-sub">Reservá TV, proyector, laboratorio y más</div></div>
+  <div class="spacer"></div>
+  <a href="/admin" class="btn sm ghost" title="Acceso del gabinete">🔒 Gabinete</a>
+</div></header>
+
+<main class="wrap">
+  <div class="tabs" role="tablist">
+    <button class="tab on" data-tab="reservar">➕ Reservar</button>
+    <button class="tab" data-tab="disponibilidad">🗓️ Ocupación</button>
+    <button class="tab" data-tab="mias">👤 Mis reservas</button>
+  </div>
+
+  <!-- ================= RESERVAR ================= -->
+  <section id="t-reservar">
+    <div class="notice hide" id="cancel-alert" style="background:var(--bad-soft);color:var(--bad);border-color:#f5c2c2;align-items:center"><span>❌</span><span style="flex:1" id="cancel-alert-txt"></span><button class="btn sm danger" id="cancel-alert-go" style="background:#fff">Ver</button></div>
+    <div class="notice hide" id="pending" style="background:var(--brand-soft);color:var(--brand);border-color:#d6d2ee;align-items:center"><span>📝</span><span style="flex:1" id="pending-txt"></span><button class="btn sm primary" id="pending-go">Completar</button></div>
+    <div class="notice" id="notice"><span>⚠️</span><span id="notice-txt"></span></div>
+
+    <div class="card" id="s1">
+      <h2 class="step-h"><span class="num" id="n1">1</span>¿Qué día?</h2>
+      <div class="chips scroll" id="days"></div>
+      <div class="row" style="margin-top:10px"><span class="muted small">¿Otra fecha?</span><input type="date" class="in-f" id="other-date" style="max-width:190px"></div>
+    </div>
+
+    <div class="card" id="s2">
+      <h2 class="step-h"><span class="num" id="n2">2</span>¿En qué horario?</h2>
+      <p class="hint">Tocá una o varias horas seguidas, o escribí el horario exacto.</p>
+      <div class="chips" id="mods"></div>
+      <div class="notice hide" id="earliest" style="margin:10px 0 0"><span>⏰</span><span id="earliest-txt"></span></div>
+      <div class="row" style="margin-top:12px">
+        <div><label class="f" for="t-start">Desde</label><input type="time" class="in-f" id="t-start" step="300"></div>
+        <div><label class="f" for="t-end">Hasta</label><input type="time" class="in-f" id="t-end" step="300"></div>
+      </div>
+    </div>
+
+    <div class="card" id="s3">
+      <h2 class="step-h"><span class="num" id="n3">3</span>¿Qué necesitás?</h2>
+      <p class="hint" id="res-hint">Podés elegir más de un recurso.</p>
+      <div id="res-list"></div>
+    </div>
+
+    <div class="card" id="s4">
+      <h2 class="step-h"><span class="num" id="n4">4</span>Tus datos</h2>
+      <p class="hint">Con tu DNI después vas a poder ver, cancelar y hacer el reporte de tus reservas.</p>
+      <div class="grid2">
+        <div><label class="f" for="f-teacher">Nombre y apellido</label><input class="in-f" id="f-teacher" autocomplete="name" placeholder="Ej: María González"></div>
+        <div><label class="f" for="f-dni">DNI <span class="opt">(sin puntos)</span></label><input class="in-f" id="f-dni" inputmode="numeric" autocomplete="off" maxlength="10" placeholder="Ej: 28123456"></div>
+        <div><label class="f" for="f-phone">Teléfono</label><input class="in-f" id="f-phone" type="tel" autocomplete="tel" inputmode="tel" placeholder="Ej: 358 4123456"></div>
+        <div><label class="f" for="f-course">Curso y nivel</label><input class="in-f" id="f-course" placeholder="Ej: 3° A – Secundario" list="course-list"><datalist id="course-list"></datalist></div>
+        <div><label class="f" for="f-place">Aula / lugar <span class="opt">(opcional)</span></label><input class="in-f" id="f-place" placeholder="Ej: Aula 12"></div>
+      </div>
+      <div style="margin-top:12px"><label class="f">Planta</label>
+        <div class="seg" id="floor"><button type="button" data-v="Planta baja">Planta baja</button><button type="button" data-v="Planta alta">Planta alta</button></div>
+      </div>
+      <div style="margin-top:12px"><label class="f" for="f-comment">Comentario <span class="opt">(opcional)</span></label><textarea class="in-f" id="f-comment" placeholder="Ej: necesito cable HDMI, materiales para el experimento de…"></textarea></div>
+      <label class="check"><input type="checkbox" id="remember" checked> Recordar mis datos en este dispositivo</label>
+    </div>
+  </section>
+
+  <!-- ================= DISPONIBILIDAD ================= -->
+  <section id="t-disponibilidad" class="hide">
+    <div class="card">
+      <div class="row" style="justify-content:space-between">
+        <div class="nav">
+          <button class="btn sm" id="av-prev" aria-label="Día anterior">◀</button>
+          <input type="date" class="in-f" id="av-date" style="max-width:180px">
+          <button class="btn sm" id="av-next" aria-label="Día siguiente">▶</button>
+        </div>
+        <strong id="av-title"></strong>
+      </div>
+      <div id="av-tl" style="margin-top:14px"></div>
+      <p class="muted small" style="margin-top:10px">Los bloques azules están <b>ocupados</b>; los espacios en blanco están <b>libres</b>.</p>
+    </div>
+  </section>
+
+  <!-- ================= MIS RESERVAS ================= -->
+  <section id="t-mias" class="hide">
+    <div class="card">
+      <h2 class="step-h" style="margin-bottom:6px">Mis reservas y reportes</h2>
+      <p class="hint">Ingresá tu DNI (solo números, sin puntos). Solo vas a ver las reservas hechas con tu DNI.</p>
+      <form class="row" id="mine-form"><input class="in-f" id="mine-dni" inputmode="numeric" maxlength="10" placeholder="Tu DNI" style="max-width:220px"><button class="btn primary">Ver mis reservas</button></form>
+      <div id="mine-list" style="margin-top:14px"></div>
+    </div>
+  </section>
+</main>
+
+<div class="actionbar" id="bar"><div class="in">
+  <div class="sum" id="sum">Completá los pasos para reservar</div>
+  <button class="btn primary lg" id="confirm">Confirmar reserva</button>
+</div></div>
+
+<script src="/common.js"></script>
+<script>
+const S = { cfg: null, resources: [], date: null, start: "", end: "", sel: new Map(), floor: "", day: [], mods: new Set() };
+const me = store.get("docente", {});
+
+/* --------- Pestañas --------- */
+$$(".tab").forEach((b) => (b.onclick = () => showTab(b.dataset.tab)));
+function showTab(t) {
+  $$(".tab").forEach((x) => x.classList.toggle("on", x.dataset.tab === t));
+  ["reservar", "disponibilidad", "mias"].forEach((x) => $("#t-" + x).classList.toggle("hide", x !== t));
+  $("#bar").classList.toggle("hide", t !== "reservar");
+  if (t === "disponibilidad") loadAvail();
+  if (t === "mias" && $("#mine-dni").value) loadMine();
+}
+
+/* --------- Reglas de tiempo --------- */
+const hoursUntil = (date, time) => (new Date(`${date}T${time}:00-03:00`) - Date.now()) / 3600e3;
+const dayAllowed = (d) => {
+  const st = S.cfg.settings;
+  if (st.weekdays?.length && !st.weekdays.includes(dObj(d).getDay())) return false;
+  if (hoursUntil(d, st.dayEnd) < st.minHoursAdvance) return false;
+  return d <= addDays(S.cfg.today, st.maxDaysAhead);
+};
+
+/* --------- Paso 1: día --------- */
+function renderDays() {
+  const out = []; let d = S.cfg.today;
+  for (let i = 0; out.length < 12 && i < 40; i++, d = addDays(d, 1)) if (dayAllowed(d)) out.push(d);
+  $("#days").innerHTML = out.map((x) => { const o = dObj(x);
+    return `<button class="chip day ${x === S.date ? "on" : ""}" data-d="${x}"><span class="sm">${DIAS[o.getDay()]}</span><span class="big">${o.getDate()}</span><span class="sm">${MESES[o.getMonth()]}</span></button>`; }).join("");
+  $$("#days .chip").forEach((b) => (b.onclick = () => setDate(b.dataset.d)));
+  const od = $("#other-date"); od.min = out[0] || S.cfg.today; od.max = addDays(S.cfg.today, S.cfg.settings.maxDaysAhead);
+}
+$("#other-date").onchange = (e) => {
+  const d = e.target.value; if (!d) return;
+  if (!dayAllowed(d)) { toast("Ese día no está disponible para reservar (fin de semana, muy cercano o muy lejano).", true); return; }
+  setDate(d);
+};
+async function setDate(d) {
+  S.date = d; $("#other-date").value = d;
+  renderDays(); renderMods(); update();
+  S.day = [];
+  try { S.day = (await api("/public/day?date=" + d)).reservations; } catch (e) { toast(e.message, true); }
+  renderMods(); renderResources(); update();
+}
+
+/* --------- Paso 2: horario --------- */
+function renderMods() {
+  const mods = S.cfg.settings.modules || [];
+  $("#mods").innerHTML = mods.map((m, i) => {
+    const dis = S.date && hoursUntil(S.date, m.start) < S.cfg.settings.minHoursAdvance;
+    return `<button class="chip mod ${S.mods.has(i) ? "on" : ""}" data-i="${i}" ${dis ? "disabled" : ""}><b>${esc(m.label)}</b><span class="sm">${m.start}–${m.end}</span></button>`;
+  }).join("") || `<span class="muted small">Escribí el horario abajo.</span>`;
+  $$("#mods .chip").forEach((b) => (b.onclick = () => clickMod(+b.dataset.i)));
+  // Si el día elegido está dentro de la anticipación mínima, avisar desde qué hora se puede
+  const st = S.cfg.settings;
+  let txt = "";
+  if (S.date) {
+    const min = new Date(Date.now() + st.minHoursAdvance * 3600e3 - 3 * 3600e3); // hora Argentina
+    const minDay = min.toISOString().slice(0, 10);
+    if (minDay === S.date) {
+      const t = fromMin(Math.ceil((min.getUTCHours() * 60 + min.getUTCMinutes()) / 5) * 5);
+      if (toMin(t) > toMin(st.dayStart)) txt = `Para este día se puede reservar a partir de las <b>${t}</b> (${st.minHoursAdvance} h de anticipación).`;
+    }
+  }
+  $("#earliest").classList.toggle("hide", !txt); $("#earliest-txt").innerHTML = txt;
+}
+function clickMod(i) {
+  const s = [...S.mods].sort((a, b) => a - b);
+  if (!s.length) S.mods = new Set([i]);
+  else if (S.mods.has(i)) { if (i === s[0] || i === s.at(-1)) S.mods.delete(i); else S.mods = new Set([i]); }
+  else { const lo = Math.min(i, s[0]), hi = Math.max(i, s.at(-1)); S.mods = new Set(); for (let k = lo; k <= hi; k++) S.mods.add(k); }
+  const mods = S.cfg.settings.modules, sel = [...S.mods].sort((a, b) => a - b);
+  S.start = sel.length ? mods[sel[0]].start : ""; S.end = sel.length ? mods[sel.at(-1)].end : "";
+  $("#t-start").value = S.start; $("#t-end").value = S.end;
+  renderMods(); renderResources(); update();
+}
+["t-start", "t-end"].forEach((id) => ($("#" + id).oninput = () => {
+  S.start = $("#t-start").value; S.end = $("#t-end").value;
+  const mods = S.cfg.settings.modules || [];
+  S.mods = new Set(mods.map((m, i) => (S.start && S.end && toMin(m.start) >= toMin(S.start) && toMin(m.end) <= toMin(S.end) ? i : -1)).filter((i) => i >= 0));
+  renderMods(); renderResources(); update();
+}));
+const timeOk = () => S.start && S.end && toMin(S.end) > toMin(S.start);
+
+/* --------- Paso 3: recursos --------- */
+function renderResources() {
+  const cats = [...new Set(S.resources.map((r) => r.category || "Otros"))];
+  const ready = S.date && timeOk();
+  $("#res-hint").textContent = ready ? "Podés elegir más de uno. Te mostramos qué está libre en tu horario." : "Elegí día y horario para ver qué está libre.";
+  let html = "";
+  for (const c of cats) {
+    html += `<div class="cat-h">${esc(c)}</div><div class="res-grid">`;
+    for (const r of S.resources.filter((x) => (x.category || "Otros") === c)) {
+      const av = ready ? availability(r, S.day, S.start, S.end) : null;
+      const busy = av && av.free === 0;
+      if (busy) S.sel.delete(r.id);
+      if (av && S.sel.has(r.id) && S.sel.get(r.id) > av.free) S.sel.set(r.id, av.free);
+      const on = S.sel.has(r.id);
+      let st = "";
+      if (av) {
+        if (busy) st = `<div class="st busy">Ocupado ${av.clashes.map((x) => x.start + "–" + x.end).join(", ")}</div>`;
+        else if (av.free < av.total) st = `<div class="st part">Quedan ${av.free} de ${av.total}</div>`;
+        else st = `<div class="st free">Libre${av.total > 1 ? ` (${av.total} disponibles)` : ""}</div>`;
+      }
+      const qty = on && av && av.free > 1 ? `<div class="qty" data-stop><button type="button" data-q="-1">−</button><b>${S.sel.get(r.id)}</b><button type="button" data-q="1">+</button><span class="small muted">unid.</span></div>` : "";
+      html += `<div class="res ${on ? "on" : ""} ${busy ? "busy" : ""}" data-id="${r.id}" role="button" tabindex="0" aria-pressed="${on}">
+        <div class="ic">${esc(r.icon || "📦")}</div><div><div class="nm">${esc(r.name)}</div>
+        <div class="loc">${esc(r.location || "")}</div>${r.notes ? `<div class="loc">ℹ️ ${esc(r.notes)}</div>` : ""}${st}${qty}</div><span class="tick">✓</span></div>`;
+    }
+    html += `</div>`;
+  }
+  $("#res-list").innerHTML = html || `<div class="empty">Todavía no hay recursos cargados.</div>`;
+  $$("#res-list .res").forEach((el) => {
+    const toggle = (e) => {
+      if (e.target.closest("[data-stop]")) return;
+      if (el.classList.contains("busy")) { toast("Ese recurso está ocupado en tu horario. Probá otro horario.", true); return; }
+      const id = el.dataset.id; S.sel.has(id) ? S.sel.delete(id) : S.sel.set(id, 1);
+      renderResources(); update();
+    };
+    el.onclick = toggle; el.onkeydown = (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggle(e); } };
+    $$("[data-q]", el).forEach((b) => (b.onclick = () => {
+      const r = S.resources.find((x) => x.id === el.dataset.id);
+      const av = availability(r, S.day, S.start, S.end);
+      S.sel.set(r.id, Math.max(1, Math.min(av.free, S.sel.get(r.id) + +b.dataset.q)));
+      renderResources(); update();
+    }));
+  });
+}
+
+/* --------- Paso 4: datos --------- */
+$$("#floor button").forEach((b) => (b.onclick = () => { S.floor = S.floor === b.dataset.v ? "" : b.dataset.v; $$("#floor button").forEach((x) => x.classList.toggle("on", x.dataset.v === S.floor)); }));
+function fillMe() {
+  $("#f-teacher").value = me.teacher || ""; $("#f-phone").value = me.phone || ""; $("#f-dni").value = me.dni || ""; $("#f-course").value = me.course || "";
+  $("#f-place").value = me.place || ""; $("#mine-dni").value = me.dni || "";
+  S.floor = me.floor || ""; $$("#floor button").forEach((x) => x.classList.toggle("on", x.dataset.v === S.floor));
+  $("#course-list").innerHTML = (me.courses || []).map((c) => `<option value="${esc(c)}">`).join("");
+}
+["f-teacher", "f-phone", "f-course"].forEach((id) => ($("#" + id).oninput = update));
+const digitsOnly = (el) => el.addEventListener("input", () => { const v = el.value.replace(/\D/g, ""); if (v !== el.value) el.value = v; update(); });
+digitsOnly($("#f-dni")); digitsOnly($("#mine-dni"));
+const dniValid = (v) => /^\d{7,8}$/.test(String(v).replace(/^0+/, ""));
+
+/* --------- Resumen y confirmación --------- */
+function update() {
+  const okData = $("#f-teacher").value.trim() && dniValid($("#f-dni").value) && $("#f-phone").value.replace(/\D/g, "").length >= 6 && $("#f-course").value.trim();
+  $("#n1").className = "num" + (S.date ? " done" : ""); $("#n1").textContent = S.date ? "✓" : "1";
+  $("#n2").className = "num" + (timeOk() ? " done" : ""); $("#n2").textContent = timeOk() ? "✓" : "2";
+  $("#n3").className = "num" + (S.sel.size ? " done" : ""); $("#n3").textContent = S.sel.size ? "✓" : "3";
+  $("#n4").className = "num" + (okData ? " done" : ""); $("#n4").textContent = okData ? "✓" : "4";
+  const parts = [];
+  if (S.date) parts.push(`<b>${fmtDate(S.date)}</b>`);
+  if (timeOk()) parts.push(`<b>${S.start}–${S.end}</b>`);
+  if (S.sel.size) parts.push(`<b>${S.sel.size} recurso${S.sel.size > 1 ? "s" : ""}</b>`);
+  $("#sum").innerHTML = parts.length ? parts.join(" · ") : "Completá los pasos para reservar";
+}
+
+$("#confirm").onclick = async () => {
+  const go = (id, msg) => { toast(msg, true); $(id).scrollIntoView({ behavior: "smooth", block: "center" }); };
+  if (!S.date) return go("#s1", "Elegí el día.");
+  if (!timeOk()) return go("#s2", "Elegí el horario (la hora de fin debe ser posterior al inicio).");
+  if (!S.sel.size) return go("#s3", "Elegí al menos un recurso.");
+  const data = {
+    date: S.date, start: S.start, end: S.end, items: [...S.sel].map(([resourceId, qty]) => ({ resourceId, qty })),
+    teacher: $("#f-teacher").value.trim(), dni: $("#f-dni").value.trim(), phone: $("#f-phone").value.trim(), course: $("#f-course").value.trim(),
+    place: $("#f-place").value.trim(), floor: S.floor, comment: $("#f-comment").value.trim(),
+  };
+  if (!data.teacher) return go("#f-teacher", "Completá tu nombre.");
+  if (!dniValid(data.dni)) return go("#f-dni", "Completá tu DNI: 7 u 8 números, sin puntos.");
+  if (data.phone.replace(/\D/g, "").length < 6) return go("#f-phone", "Completá tu teléfono.");
+  if (!data.course) return go("#f-course", "Completá curso y nivel.");
+  const btn = $("#confirm"); btn.disabled = true; btn.innerHTML = `<span class="spin"></span> Reservando…`;
+  try {
+    const { reservation: r } = await api("/public/reservations", { method: "POST", body: data });
+    if ($("#remember").checked) {
+      const courses = [...new Set([data.course, ...(me.courses || [])])].slice(0, 8);
+      Object.assign(me, { teacher: data.teacher, dni: data.dni, phone: data.phone, course: data.course, place: data.place, floor: data.floor, courses });
+      store.set("docente", me);
+    } else store.del("docente");
+    success(r);
+  } catch (e) {
+    toast(e.message, true);
+    if (e.status === 409) setDate(S.date);
+  } finally { btn.disabled = false; btn.textContent = "Confirmar reserva"; }
+};
+
+function success(r) {
+  modal(`<div style="text-align:center"><div class="success-ic">✓</div><h3>¡Reserva confirmada!</h3>
+    <p class="muted" style="margin-top:-6px">Retirá los recursos en el gabinete.</p></div>
+    <dl class="kv" style="margin:16px 0">
+      <dt>Día</dt><dd><b>${fmtDateLong(r.date)}</b></dd>
+      <dt>Horario</dt><dd>${r.start} a ${r.end}</dd>
+      <dt>Recursos</dt><dd>${esc(itemsText(r.items, S.resources))}</dd>
+      <dt>Curso</dt><dd>${esc(r.course)}</dd>
+      ${r.place || r.floor ? `<dt>Lugar</dt><dd>${esc([r.place, r.floor].filter(Boolean).join(" – "))}</dd>` : ""}
+      <dt>Código</dt><dd><span class="code">${r.id}</span></dd>
+    </dl>
+    ${needsReport(r, S.resources) ? `<div class="notice" style="background:var(--brand-soft);color:var(--brand);border-color:#d6d2ee"><span>📝</span><span>Vos completás el <b>reporte de la sala</b> (alumnos por máquina, tema, novedades) desde <b>Mis reservas</b> con tu DNI. Podés cargar la lista de alumnos antes y terminarlo al salir.</span></div>` : ""}
+    <p class="small muted">Si necesitás cancelar, entrá a <b>Mis reservas</b> con tu DNI.</p>
+    <div class="foot" style="justify-content:center">
+      <a class="btn" target="_blank" rel="noopener" href="${gcalLink(r, S.resources, S.cfg.settings.schoolName)}">📆 Agregar a mi calendario</a>
+      <button class="btn primary" data-close id="again">Hacer otra reserva</button>
+    </div>`, { onMount: (m) => ($("#again", m).onclick = reset) });
+}
+function reset() {
+  S.sel.clear(); S.mods.clear(); S.start = S.end = ""; $("#t-start").value = $("#t-end").value = ""; $("#f-comment").value = "";
+  fillMe(); setDate(S.date); window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+/* --------- Disponibilidad --------- */
+async function loadAvail() {
+  const el = $("#av-date"); if (!el.value) el.value = S.date || S.cfg.today;
+  const d = el.value; $("#av-title").textContent = fmtDateLong(d);
+  $("#av-tl").innerHTML = `<div class="empty"><span class="spin"></span></div>`;
+  try {
+    const { reservations } = await api("/public/day?date=" + d);
+    timeline($("#av-tl"), { resources: S.resources, reservations, dayStart: S.cfg.settings.dayStart, dayEnd: S.cfg.settings.dayEnd, modules: S.cfg.settings.modules });
+  } catch (e) { $("#av-tl").innerHTML = `<div class="empty">${esc(e.message)}</div>`; }
+}
+$("#av-date").onchange = loadAvail;
+$("#av-prev").onclick = () => { $("#av-date").value = addDays($("#av-date").value, -1); loadAvail(); };
+$("#av-next").onclick = () => { $("#av-date").value = addDays($("#av-date").value, 1); loadAvail(); };
+
+/* --------- Mis reservas y reportes --------- */
+$("#mine-form").onsubmit = (e) => { e.preventDefault(); loadMine(); };
+const isPending = (r, today) => r.status !== "cancelada" && !r.report && r.date <= today && needsReport(r, S.resources);
+const byGab = (r) => r.status === "cancelada" && r.cancelledBy === "gabinete";
+const seenCancels = () => store.get("cancel-vistas", []);
+function mineItem(r, today) {
+  if (r.status === "cancelada") {
+    const when = r.cancelledAt ? new Date(r.cancelledAt).toLocaleString("es-AR", { dateStyle: "short", timeStyle: "short" }) : "";
+    return `<div class="item" style="border-color:#f5c2c2;background:#fffafa"><div class="when">${fmtDate(r.date)}<small>${r.start}–${r.end}</small></div>
+      <div class="body"><div><b style="text-decoration:line-through;text-decoration-color:#e8a0a0">${esc(itemsText(r.items, S.resources))}</b> <span class="badge cancelada">cancelada</span></div>
+        <div class="small" style="margin-top:4px">${byGab(r) ? `<b>Cancelada por el gabinete</b>${when ? " el " + when : ""}` : `Cancelaste esta reserva${when ? " el " + when : ""}`}</div>
+        ${byGab(r) ? `<div style="margin-top:6px;padding:8px 10px;border-radius:8px;background:#fff;border:1px solid #f5c2c2;font-size:14px"><b>Motivo:</b> ${esc(r.cancelReason || "Sin motivo informado")}</div>` : ""}</div>
+      <div class="acts">${r.date >= today ? `<button class="btn sm" data-again="${r.id}">🔁 Reservar otra vez</button>` : ""}</div></div>`;
+  }
+  // El reporte de la sala lo carga el docente: puede adelantarlo (ej. lista de alumnos) o completarlo después de la clase
+  const rep = needsReport(r, S.resources) && r.status !== "cancelada";
+  const repBtn = !rep ? "" : r.report ? `<button class="btn sm" data-rep="${r.id}">📝 Ver / editar reporte</button>`
+    : r.date <= today ? `<button class="btn sm primary" data-rep="${r.id}">📝 Completar reporte</button>` : `<button class="btn sm" data-rep="${r.id}">📝 Cargar reporte de sala</button>`;
+  return `<div class="item"><div class="when">${fmtDate(r.date)}<small>${r.start}–${r.end}</small></div>
+    <div class="body"><div><b>${esc(itemsText(r.items, S.resources))}</b></div>
+      <div class="small muted">${esc(r.course)}${r.place ? " · " + esc(r.place) : ""} · <span class="badge ${r.status}">${r.status}</span>${r.report ? ` · <span class="badge" style="background:var(--ok-soft);color:var(--ok)">✓ reporte enviado</span>` : ""}</div></div>
+    <div class="acts">${repBtn}${r.status === "confirmada" && r.date >= today ? `<button class="btn sm danger" data-cancel="${r.id}">Cancelar</button>` : ""}</div></div>`;
+}
+async function loadMine() {
+  const dni = $("#mine-dni").value.trim();
+  if (!dniValid(dni)) { toast("Ingresá tu DNI: 7 u 8 números, sin puntos.", true); return; }
+  const box = $("#mine-list"); box.innerHTML = `<div class="empty"><span class="spin"></span></div>`;
+  try {
+    const { reservations, today } = await api("/public/mine?dni=" + encodeURIComponent(dni));
+    const pending = reservations.filter((r) => isPending(r, today));
+    const upcoming = reservations.filter((r) => r.date >= today && !pending.includes(r) && r.status !== "cancelada");
+    const cancelled = reservations.filter((r) => r.status === "cancelada" && (r.date >= today || byGab(r))).sort((a, b) => (b.cancelledAt || "").localeCompare(a.cancelledAt || ""));
+    const done = reservations.filter((r) => r.date < today && r.report).reverse();
+    const sec = (t, list) => (list.length ? `<div class="cat-h" style="margin-top:14px">${t}</div>` + list.map((r) => mineItem(r, today)).join("") : "");
+    box.innerHTML = (sec("📝 Reportes pendientes", pending) + sec("❌ Canceladas", cancelled.filter(byGab)) + sec("Próximas", upcoming) + sec("Canceladas por vos", cancelled.filter((r) => !byGab(r))) + sec("Reportes enviados (últimos 30 días)", done))
+      || `<div class="empty"><div class="e-ic">🗓️</div>No hay reservas hechas con ese DNI.</div>`;
+    $$("[data-cancel]", box).forEach((b) => (b.onclick = async () => {
+      if (!(await confirmBox("¿Cancelar esta reserva?", "Sí, cancelar", true))) return;
+      try { await api("/public/cancel", { method: "POST", body: { id: b.dataset.cancel, dni } }); toast("Reserva cancelada"); loadMine(); if (S.date) setDate(S.date); }
+      catch (e) { toast(e.message, true); }
+    }));
+    $$("[data-rep]", box).forEach((b) => (b.onclick = () => openReport(reservations.find((x) => x.id === b.dataset.rep), dni)));
+    $$("[data-again]", box).forEach((b) => (b.onclick = () => reserveAgain(reservations.find((x) => x.id === b.dataset.again))));
+    showPending(pending.length);
+    store.set("cancel-vistas", [...new Set([...seenCancels(), ...cancelled.filter(byGab).map((r) => r.id)])].slice(-100));
+    showCancelAlert([]);
+  } catch (e) { box.innerHTML = `<div class="empty">${esc(e.message)}</div>`; }
+}
+function openReport(r, dni) {
+  modal(`<h3 style="margin-bottom:4px">📝 Reporte de uso de la sala</h3>
+    <p class="muted small" style="margin-top:0">${esc(itemsText(r.items, S.resources))} · ${fmtDateLong(r.date)}, ${r.start} a ${r.end}</p>
+    <div id="rp"></div>
+    <div class="foot"><button class="btn" data-close>Cancelar</button><button class="btn primary" id="rp-ok">Enviar reporte</button></div>`, {
+    wide: true,
+    onMount: (m, close) => {
+      const collect = mountReport($("#rp", m), { report: r.report, machines: reportMachines(r, S.resources), course: r.course });
+      $("#rp-ok", m).onclick = async (e) => {
+        const rep = collect();
+        if (!rep.subject) return toast("Completá la materia.", true);
+        if (!rep.topic) return toast("Completá el tema que se dio.", true);
+        if (!rep.roomState) return toast("Indicá cómo encontraste la sala.", true);
+        if (rep.roomState === "observaciones" && !rep.roomNotes) return toast("Contá qué observaste al ingresar.", true);
+        e.target.disabled = true;
+        try {
+          await api("/public/report", { method: "POST", body: { id: r.id, dni, report: rep } });
+          rememberReport(r.course, rep); toast("¡Reporte enviado! Gracias."); close(); loadMine();
+        } catch (err) { toast(err.message, true); e.target.disabled = false; }
+      };
+    },
+  });
+}
+function showPending(n) {
+  $("#pending").classList.toggle("hide", !n);
+  $("#pending-txt").innerHTML = n === 1 ? "Tenés <b>1 reporte de sala</b> pendiente." : `Tenés <b>${n} reportes de sala</b> pendientes.`;
+}
+$("#pending-go").onclick = () => showTab("mias");
+function showCancelAlert(list) {
+  $("#cancel-alert").classList.toggle("hide", !list.length);
+  if (!list.length) return;
+  const r = list[0];
+  $("#cancel-alert-txt").innerHTML = list.length === 1
+    ? `El gabinete <b>canceló tu reserva</b> del ${fmtDate(r.date)} (${esc(itemsText(r.items, S.resources))}). Motivo: <b>${esc(r.cancelReason || "—")}</b>`
+    : `El gabinete <b>canceló ${list.length} reservas tuyas</b>. Mirá los motivos en Mis reservas.`;
+}
+$("#cancel-alert-go").onclick = () => showTab("mias");
+function reserveAgain(r) {
+  showTab("reservar");
+  S.sel = new Map(r.items.map((i) => [i.resourceId, i.qty])); S.start = r.start; S.end = r.end;
+  $("#t-start").value = r.start; $("#t-end").value = r.end; $("#t-start").dispatchEvent(new Event("input"));
+  if (dayAllowed(r.date)) setDate(r.date); else { toast("Ese día ya no se puede reservar. Elegí otro.", true); renderResources(); update(); }
+  setTimeout(() => $("#s3").scrollIntoView({ behavior: "smooth", block: "start" }), 300);
+}
+async function checkPending() {
+  if (!dniValid(me.dni || "")) return;
+  try {
+    const { reservations, today } = await api("/public/mine?dni=" + encodeURIComponent(me.dni));
+    showPending(reservations.filter((r) => isPending(r, today)).length);
+    const seen = new Set(seenCancels());
+    showCancelAlert(reservations.filter((r) => byGab(r) && !seen.has(r.id) && r.date >= addDays(today, -7)));
+  } catch {}
+}
+
+/* --------- Inicio --------- */
+(async () => {
+  try {
+    S.cfg = await api("/public/config");
+    S.resources = S.cfg.resources;
+    const st = S.cfg.settings;
+    $("#school").textContent = st.schoolName; document.title = "Reservas · " + st.schoolName;
+    if (st.notice) $("#notice-txt").textContent = st.notice; else $("#notice").classList.add("hide");
+    $("#t-start").min = $("#t-end").min = st.dayStart; $("#t-start").max = $("#t-end").max = st.dayEnd;
+    fillMe(); renderDays(); renderMods(); renderResources(); update(); checkPending();
+    const first = $("#days .chip"); if (first) setDate(first.dataset.d);
+  } catch (e) { $("#t-reservar").innerHTML = `<div class="card empty">No se pudo cargar el sistema: ${esc(e.message)}</div>`; }
+})();
+</script>
+</body>
+</html>

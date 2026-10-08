@@ -1,0 +1,506 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Panel del gabinete</title>
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#45358b">
+<link rel="icon" type="image/png" href="/favicon.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+
+<!-- ================= LOGIN ================= -->
+<div id="login" class="hide"><div class="wrap"><div class="card login">
+  <img class="logo-img" src="/logo.png" alt="Logo ENS Justo José de Urquiza">
+  <h2 style="text-align:center;margin:0 0 4px">Panel del gabinete</h2>
+  <p class="muted" style="text-align:center;margin:0 0 18px">Ingresá con tu usuario</p>
+  <form id="login-form">
+    <label class="f" for="l-user">Usuario</label><input class="in-f" id="l-user" autocomplete="username" autocapitalize="none" required>
+    <label class="f" for="l-pass" style="margin-top:10px">Contraseña</label><input class="in-f" id="l-pass" type="password" autocomplete="current-password" required>
+    <button class="btn primary lg" style="width:100%;justify-content:center;margin-top:16px" id="l-btn">Ingresar</button>
+  </form>
+  <p style="text-align:center;margin:16px 0 0"><a href="/">← Volver a reservas</a></p>
+</div></div></div>
+
+<!-- ================= APP ================= -->
+<div id="app" class="hide">
+<header class="topbar"><div class="in">
+  <img class="logo-img" src="/logo.png" alt="Logo ENS Justo José de Urquiza">
+  <div><div class="brand-name" id="school">Panel del gabinete</div><div class="brand-sub" id="who"></div></div>
+  <div class="spacer"></div>
+  <a href="/" class="btn sm ghost" target="_blank">Vista docente ↗</a>
+  <button class="btn sm" id="pwd-btn" title="Cambiar mi contraseña">🔑</button>
+  <button class="btn sm" id="logout">Salir</button>
+</div></header>
+
+<main class="wrap">
+  <div class="tabs">
+    <button class="tab on" data-tab="agenda">📋 Agenda</button>
+    <button class="tab" data-tab="reservas">🔎 Reservas</button>
+    <button class="tab" data-tab="recursos">📦 Recursos</button>
+    <button class="tab it-only" data-tab="usuarios">👥 Usuarios</button>
+    <button class="tab it-only" data-tab="config">⚙️ Configuración</button>
+  </div>
+
+  <!-- Agenda -->
+  <section id="t-agenda">
+    <div class="card">
+      <div class="row" style="justify-content:space-between">
+        <div class="nav">
+          <button class="btn sm" id="ag-prev">◀</button>
+          <button class="btn sm" id="ag-today">Hoy</button>
+          <button class="btn sm" id="ag-next">▶</button>
+          <input type="date" class="in-f" id="ag-date" style="max-width:170px">
+        </div>
+        <button class="btn primary" id="ag-new">➕ Nueva reserva</button>
+      </div>
+      <h2 id="ag-title" style="margin:14px 0 2px"></h2>
+      <div class="muted small" id="ag-stats"></div>
+      <div id="ag-tl" style="margin-top:12px"></div>
+    </div>
+    <div class="card">
+      <h3 style="margin:0 0 12px">Entregas y devoluciones del día</h3>
+      <div id="ag-list"></div>
+    </div>
+  </section>
+
+  <!-- Reservas -->
+  <section id="t-reservas" class="hide">
+    <div class="card">
+      <div class="grid3">
+        <div><label class="f">Desde</label><input type="date" class="in-f" id="rs-from"></div>
+        <div><label class="f">Hasta</label><input type="date" class="in-f" id="rs-to"></div>
+        <div><label class="f">Estado</label><select class="in-f" id="rs-status"><option value="">Todos</option><option>confirmada</option><option>entregada</option><option>devuelta</option><option>cancelada</option></select></div>
+        <div><label class="f">Recurso</label><select class="in-f" id="rs-res"><option value="">Todos</option></select></div>
+        <div><label class="f">Reporte de sala</label><select class="in-f" id="rs-rep"><option value="">Todos</option><option value="con">📝 Con reporte</option><option value="pend">⏳ Pendiente</option></select></div>
+        <div><label class="f">Buscar</label><input class="in-f" id="rs-q" placeholder="Docente, DNI, curso, alumno, máquina…"></div>
+      </div>
+      <div class="row" style="margin-top:12px;justify-content:space-between">
+        <span class="muted small" id="rs-count"></span>
+        <div class="row"><button class="btn" id="rs-csv">⬇️ Reservas (CSV)</button><button class="btn" id="rs-csv-rep">⬇️ Reportes de sala (CSV)</button><button class="btn primary" id="rs-new">➕ Nueva</button></div>
+      </div>
+    </div>
+    <div class="card tbl-wrap"><table class="tbl"><thead><tr><th>Fecha</th><th>Horario</th><th>Recursos</th><th>Docente</th><th>Curso / lugar</th><th>Estado</th></tr></thead><tbody id="rs-body"></tbody></table></div>
+  </section>
+
+  <!-- Recursos -->
+  <section id="t-recursos" class="hide">
+    <div class="card">
+      <div class="row" style="justify-content:space-between"><div><h3 style="margin:0">Recursos</h3><div class="muted small">Lo que los docentes pueden reservar. "Cantidad" = unidades que se pueden prestar a la vez.</div></div><button class="btn primary" id="rc-new">➕ Agregar recurso</button></div>
+    </div>
+    <div class="card tbl-wrap"><table class="tbl"><thead><tr><th></th><th>Recurso</th><th>Categoría</th><th>Ubicación</th><th>Cant.</th><th>Estado</th><th></th></tr></thead><tbody id="rc-body"></tbody></table></div>
+  </section>
+
+  <!-- Usuarios -->
+  <section id="t-usuarios" class="hide">
+    <div class="card">
+      <div class="row" style="justify-content:space-between"><div><h3 style="margin:0">Usuarios del gabinete</h3><div class="muted small">Los docentes no necesitan usuario. Acá creás las cuentas del personal del gabinete.</div></div><button class="btn primary" id="us-new">➕ Nuevo usuario</button></div>
+    </div>
+    <div class="card tbl-wrap"><table class="tbl"><thead><tr><th>Nombre</th><th>Usuario</th><th>Rol</th><th>Estado</th><th></th></tr></thead><tbody id="us-body"></tbody></table></div>
+  </section>
+
+  <!-- Configuración -->
+  <section id="t-config" class="hide">
+    <form class="card" id="cf-form">
+      <h3 style="margin-top:0">General</h3>
+      <div class="grid2">
+        <div><label class="f">Nombre de la escuela / gabinete</label><input class="in-f" id="cf-name"></div>
+        <div class="grid2">
+          <div><label class="f">Anticipación mínima (horas)</label><input class="in-f" id="cf-min" type="number" min="0"></div>
+          <div><label class="f">Reservar hasta (días)</label><input class="in-f" id="cf-max" type="number" min="1"></div>
+        </div>
+      </div>
+      <label class="f" style="margin-top:12px">Aviso para docentes</label><textarea class="in-f" id="cf-notice"></textarea>
+      <div class="grid2" style="margin-top:12px">
+        <div><label class="f">Días habilitados</label><div class="chips" id="cf-days"></div></div>
+        <div class="grid2"><div><label class="f">Hora inicio</label><input class="in-f" type="time" id="cf-ds"></div><div><label class="f">Hora fin</label><input class="in-f" type="time" id="cf-de"></div></div>
+      </div>
+      <h3>Módulos / horas de clase</h3>
+      <p class="hint">Aparecen como botones rápidos para elegir el horario.</p>
+      <div id="cf-mods"></div>
+      <button type="button" class="btn sm" id="cf-addmod">➕ Agregar módulo</button>
+      <div class="row" style="justify-content:flex-end;margin-top:16px"><button class="btn primary">Guardar configuración</button></div>
+    </form>
+  </section>
+</main>
+</div>
+
+<script src="/common.js"></script>
+<script>
+const A = { token: null, user: null, resources: [], settings: null, agDate: null, list: [] };
+const today = () => iso(new Date());
+const call = (p, o = {}) => api(p, { ...o, token: A.token }).catch((e) => { if (e.status === 401) { logout(); } throw e; });
+const STATUS_NEXT = { confirmada: ["entregada", "📤 Entregado"], entregada: ["devuelta", "📥 Devuelto"] };
+
+/* ---------------- Sesión ---------------- */
+function logout() { store.del("gab-session"); A.token = null; $("#app").classList.add("hide"); $("#login").classList.remove("hide"); }
+$("#logout").onclick = logout;
+$("#login-form").onsubmit = async (e) => {
+  e.preventDefault(); const b = $("#l-btn"); b.disabled = true; b.innerHTML = `<span class="spin"></span>`;
+  try {
+    const r = await api("/auth/login", { method: "POST", body: { username: $("#l-user").value, password: $("#l-pass").value } });
+    store.set("gab-session", r); start(r);
+  } catch (err) { toast(err.message, true); } finally { b.disabled = false; b.textContent = "Ingresar"; }
+};
+$("#pwd-btn").onclick = () => {
+  modal(`<h3>Cambiar mi contraseña</h3>
+    <label class="f">Contraseña actual</label><input class="in-f" type="password" id="p0">
+    <label class="f" style="margin-top:10px">Contraseña nueva (mín. 6)</label><input class="in-f" type="password" id="p1">
+    <div class="foot"><button class="btn" data-close>Cancelar</button><button class="btn primary" id="p-ok">Guardar</button></div>`, {
+    onMount: (m, close) => ($("#p-ok", m).onclick = async () => {
+      try { await call("/admin/me/password", { method: "POST", body: { currentPassword: $("#p0", m).value, newPassword: $("#p1", m).value } }); toast("Contraseña actualizada"); close(); }
+      catch (e) { toast(e.message, true); }
+    }),
+  });
+};
+
+async function start(sess) {
+  A.token = sess.token; A.user = sess.user;
+  $("#login").classList.add("hide"); $("#app").classList.remove("hide");
+  $("#who").textContent = A.user.env ? "Admin IT" : `${A.user.name} · ${A.user.role === "it" ? "Admin IT" : "Administrador"}`;
+  $("#pwd-btn").classList.toggle("hide", !!A.user.env);
+  $$(".it-only").forEach((x) => x.classList.toggle("hide", A.user.role !== "it"));
+  try {
+    const [r, s] = await Promise.all([call("/admin/resources"), call("/admin/settings")]);
+    A.resources = r.resources; A.settings = s.settings;
+    $("#school").textContent = A.settings.schoolName;
+    fillResSelect();
+    A.agDate = today(); $("#ag-date").value = A.agDate;
+    $("#rs-from").value = today(); $("#rs-to").value = addDays(today(), 30);
+    loadAgenda();
+  } catch (e) { toast(e.message, true); }
+}
+
+/* ---------------- Pestañas ---------------- */
+$$(".tab").forEach((b) => (b.onclick = () => {
+  $$(".tab").forEach((x) => x.classList.toggle("on", x === b));
+  ["agenda", "reservas", "recursos", "usuarios", "config"].forEach((t) => $("#t-" + t).classList.toggle("hide", t !== b.dataset.tab));
+  ({ agenda: loadAgenda, reservas: loadList, recursos: renderResources, usuarios: loadUsers, config: renderConfig })[b.dataset.tab]();
+}));
+const repState = (r) => (!needsReport(r, A.resources) || r.status === "cancelada" ? "" : r.report ? "con" : r.date <= today() ? "pend" : "");
+const repBadge = (r) => ({ con: ` <span class="badge" style="background:var(--ok-soft);color:var(--ok)">📝 reporte</span>`, pend: ` <span class="badge entregada">⏳ reporte pendiente</span>` })[repState(r)] || "";
+const resName = (id) => { const r = A.resources.find((x) => x.id === id); return r ? r.name : "(eliminado)"; };
+
+/* ---------------- Agenda ---------------- */
+async function loadAgenda() {
+  const d = A.agDate; $("#ag-date").value = d;
+  const t = fmtDateLong(d); $("#ag-title").textContent = t[0].toUpperCase() + t.slice(1) + (d === today() ? " · hoy" : "");
+  try {
+    const { reservations } = await call(`/admin/reservations?from=${d}&to=${d}`);
+    const act = reservations.filter((r) => r.status !== "cancelada");
+    const pend = act.filter((r) => r.status === "confirmada").length, out = act.filter((r) => r.status === "entregada").length;
+    $("#ag-stats").textContent = `${act.length} reserva${act.length !== 1 ? "s" : ""} · ${pend} por entregar · ${out} sin devolver`;
+    timeline($("#ag-tl"), { resources: A.resources.filter((r) => r.active !== false), reservations, dayStart: A.settings.dayStart, dayEnd: A.settings.dayEnd, modules: A.settings.modules, onBlock: (id) => detail(reservations.find((x) => x.id === id)), admin: true });
+    $("#ag-list").innerHTML = reservations.length ? reservations.map(itemRow).join("") : `<div class="empty"><div class="e-ic">☕</div>No hay reservas para este día.</div>`;
+    bindRows($("#ag-list"), reservations, loadAgenda);
+  } catch (e) { $("#ag-list").innerHTML = `<div class="empty">${esc(e.message)}</div>`; }
+}
+function itemRow(r) {
+  const nx = STATUS_NEXT[r.status];
+  return `<div class="item" style="${r.status === "cancelada" ? "opacity:.55" : ""}"><div class="when">${r.start}<small>a ${r.end}</small></div>
+    <div class="body"><b>${esc(itemsText(r.items, A.resources))}</b>
+      <div class="small">${esc(r.teacher)} · ${esc(r.course)}${r.place || r.floor ? " · " + esc([r.place, r.floor].filter(Boolean).join(", ")) : ""}</div>
+      <div class="small muted">${r.phone ? `📞 <a href="tel:${esc(r.phone)}">${esc(r.phone)}</a> · ` : ""}<span class="badge ${r.status}">${r.status}</span>${repBadge(r)}${r.comment ? ` · 💬 ${esc(r.comment)}` : ""}${r.adminNote ? ` · 📝 ${esc(r.adminNote)}` : ""}${r.status === "cancelada" ? ` · <span style="color:var(--bad)">${r.cancelledBy === "docente" ? "cancelada por el docente" : "motivo: " + esc(r.cancelReason || "—")}</span>` : ""}</div></div>
+    <div class="acts">${nx ? `<button class="btn sm ok" data-st="${nx[0]}" data-id="${r.id}">${nx[1]}</button>` : ""}<button class="btn sm" data-open="${r.id}">Ver</button></div></div>`;
+}
+function bindRows(box, list, reload) {
+  $$("[data-st]", box).forEach((b) => (b.onclick = async () => {
+    try { await call("/admin/reservations/" + b.dataset.id, { method: "PUT", body: { status: b.dataset.st } }); toast("Marcada como " + b.dataset.st); reload(); } catch (e) { toast(e.message, true); }
+  }));
+  $$("[data-open]", box).forEach((b) => (b.onclick = () => detail(list.find((x) => x.id === b.dataset.open), reload)));
+}
+$("#ag-prev").onclick = () => { A.agDate = addDays(A.agDate, -1); loadAgenda(); };
+$("#ag-next").onclick = () => { A.agDate = addDays(A.agDate, 1); loadAgenda(); };
+$("#ag-today").onclick = () => { A.agDate = today(); loadAgenda(); };
+$("#ag-date").onchange = (e) => { if (e.target.value) { A.agDate = e.target.value; loadAgenda(); } };
+$("#ag-new").onclick = () => editForm({ date: A.agDate }, loadAgenda);
+$("#rs-new").onclick = () => editForm({ date: today() }, loadList);
+
+/* ---------------- Detalle ---------------- */
+function detail(r, reload = loadAgenda) {
+  if (!r) return;
+  const nx = STATUS_NEXT[r.status];
+  const hist = (r.history || []).map((h) => `${new Date(h.at).toLocaleString("es-AR", { dateStyle: "short", timeStyle: "short" })} — ${esc(h.by)}: ${h.status}`).join("<br>");
+  modal(`<div class="row" style="justify-content:space-between"><h3 style="margin:0">Reserva <span class="code">${r.id}</span></h3><span class="badge ${r.status}">${r.status}</span></div>
+    <dl class="kv" style="margin:16px 0">
+      <dt>Día</dt><dd><b>${fmtDateLong(r.date)}</b>, ${r.start} a ${r.end}</dd>
+      <dt>Recursos</dt><dd>${esc(itemsText(r.items, A.resources))}</dd>
+      <dt>Docente</dt><dd>${esc(r.teacher)}</dd>
+      <dt>DNI</dt><dd>${esc(r.dni || "—")}</dd>
+      <dt>Teléfono</dt><dd>${r.phone ? `<a href="tel:${esc(r.phone)}">${esc(r.phone)}</a> · <a target="_blank" href="https://wa.me/549${esc(r.phone.replace(/\D/g, "").slice(-10))}">WhatsApp</a>` : "—"}</dd>
+      <dt>Curso</dt><dd>${esc(r.course)}</dd>
+      <dt>Lugar</dt><dd>${esc([r.place, r.floor].filter(Boolean).join(" – ") || "—")}</dd>
+      <dt>Comentario</dt><dd>${esc(r.comment || "—")}</dd>
+      <dt>Creada</dt><dd class="small">${new Date(r.createdAt).toLocaleString("es-AR")} por ${esc(r.createdBy)}</dd>
+      ${r.status === "cancelada" ? `<dt>Cancelada</dt><dd><span style="color:var(--bad)">${r.cancelledBy === "docente" ? "Por el docente" : "Por el gabinete" + (r.cancelledByUser ? " (" + esc(r.cancelledByUser) + ")" : "")}${r.cancelledAt ? " · " + new Date(r.cancelledAt).toLocaleString("es-AR", { dateStyle: "short", timeStyle: "short" }) : ""}</span>${r.cancelReason ? `<br>Motivo: <b>${esc(r.cancelReason)}</b>` : ""}</dd>` : ""}
+      ${hist ? `<dt>Historial</dt><dd class="small">${hist}</dd>` : ""}
+    </dl>
+    ${r.report ? `<div class="row" style="justify-content:space-between;padding:10px 12px;border:1px solid var(--line);border-radius:10px;margin-bottom:12px"><span>📝 El docente envió el <b>reporte de uso</b></span><button class="btn sm" id="d-view-rep">Ver reporte</button></div>` : ""}
+    <label class="f">Nota interna del gabinete</label>
+    <div class="row"><input class="in-f" id="d-note" value="${esc(r.adminNote || "")}" style="flex:1"><button class="btn sm" id="d-note-ok">Guardar</button></div>
+    <div class="foot">
+      ${r.status === "cancelada"
+        ? `<button class="btn danger" id="d-del">🗑️ Eliminar</button><button class="btn" id="d-react">Reactivar</button>`
+        : `<button class="btn danger" id="d-cancel">Cancelar reserva</button><button class="btn" id="d-edit">✏️ Editar</button>`}
+      ${nx ? `<button class="btn ok" id="d-next">${nx[1]}</button>` : ""}
+    </div>`, {
+    onMount: (m, close) => {
+      const put = async (body, msg) => { try { await call("/admin/reservations/" + r.id, { method: "PUT", body }); toast(msg); close(); reload(); } catch (e) { toast(e.message, true); } };
+      $("#d-view-rep", m) && ($("#d-view-rep", m).onclick = () => { close(); viewReport(r, reload); });
+      $("#d-note-ok", m).onclick = () => put({ adminNote: $("#d-note", m).value }, "Nota guardada");
+      $("#d-next", m) && ($("#d-next", m).onclick = () => put({ status: nx[0] }, "Marcada como " + nx[0]));
+      $("#d-cancel", m) && ($("#d-cancel", m).onclick = () => { close(); cancelWithReason(r, reload); });
+      $("#d-react", m) && ($("#d-react", m).onclick = () => put({ status: "confirmada" }, "Reserva reactivada"));
+      $("#d-edit", m) && ($("#d-edit", m).onclick = () => { close(); editForm(r, reload); });
+      $("#d-del", m) && ($("#d-del", m).onclick = async () => { close(); if (await confirmBox("¿Eliminar definitivamente?", "Eliminar", true)) { try { await call("/admin/reservations/" + r.id, { method: "DELETE" }); toast("Eliminada"); reload(); } catch (e) { toast(e.message, true); } } });
+    },
+  });
+}
+
+// Solo lectura: el reporte lo carga el docente
+function viewReport(r, reload) {
+  modal(`<h3 style="margin-bottom:4px">📝 Reporte del docente</h3>
+    <p class="muted small" style="margin-top:0">${esc(r.teacher)} · ${esc(r.course)} · ${fmtDateLong(r.date)}, ${r.start} a ${r.end}</p>
+    ${reportView(r.report)}
+    <div class="foot"><button class="btn" id="v-back">← Volver</button><button class="btn primary" id="v-print">🖨️ Imprimir</button></div>`, {
+    wide: true,
+    onMount: (m, close) => {
+      $("#v-print", m).onclick = () => printReport(r, A.resources, A.settings.schoolName);
+      $("#v-back", m).onclick = () => { close(); detail(r, reload); };
+    },
+  });
+}
+function cancelWithReason(r, reload) {
+  const quick = ["Recurso en reparación", "Acto o evento escolar", "Superposición con otra actividad", "Mantenimiento de la sala", "A pedido del docente", "Suspensión de clases"];
+  modal(`<h3>Cancelar reserva</h3>
+    <p class="muted small" style="margin-top:-6px">${esc(r.teacher)} · ${esc(itemsText(r.items, A.resources))} · ${fmtDate(r.date)} ${r.start}–${r.end}</p>
+    <label class="f">Motivo <span class="opt">(el docente lo va a ver)</span></label>
+    <div class="chips" style="margin-bottom:8px">${quick.map((q) => `<button type="button" class="chip" data-q="${esc(q)}" style="padding:5px 10px;font-size:13.5px">${esc(q)}</button>`).join("")}</div>
+    <textarea class="in-f" id="c-reason" placeholder="Ej: el proyector está en reparación; podés usar el televisor del gabinete."></textarea>
+    <div class="foot"><button class="btn" data-close>Volver</button><button class="btn danger" id="c-ok">Cancelar reserva</button></div>`, {
+    onMount: (m, close) => {
+      $$("[data-q]", m).forEach((b) => (b.onclick = () => { const t = $("#c-reason", m); t.value = t.value ? t.value + ". " + b.dataset.q : b.dataset.q; t.focus(); }));
+      $("#c-ok", m).onclick = async () => {
+        const reason = $("#c-reason", m).value.trim();
+        if (!reason) return toast("Escribí el motivo: el docente lo va a ver.", true);
+        try { await call("/admin/reservations/" + r.id, { method: "PUT", body: { status: "cancelada", cancelReason: reason } }); toast("Reserva cancelada. El docente verá el motivo."); close(); reload(); }
+        catch (e) { toast(e.message, true); }
+      };
+    },
+  });
+}
+
+/* ---------------- Crear / editar reserva ---------------- */
+function editForm(r, reload) {
+  const isNew = !r.id;
+  const sel = new Map((r.items || []).map((i) => [i.resourceId, i.qty]));
+  const mods = A.settings.modules || [];
+  modal(`<h3>${isNew ? "Nueva reserva" : "Editar reserva"}</h3>
+    <p class="hint">Desde el panel podés reservar sin las restricciones de anticipación.</p>
+    <div class="grid3"><div><label class="f">Fecha</label><input type="date" class="in-f" id="e-date" value="${r.date || ""}"></div>
+      <div><label class="f">Desde</label><input type="time" class="in-f" id="e-start" value="${r.start || ""}"></div>
+      <div><label class="f">Hasta</label><input type="time" class="in-f" id="e-end" value="${r.end || ""}"></div></div>
+    <div class="chips" style="margin-top:8px">${mods.map((x, i) => `<button type="button" class="chip mod" data-m="${i}" style="padding:4px 8px"><span class="sm">${esc(x.label)}</span></button>`).join("")}</div>
+    <label class="f" style="margin-top:12px">Recursos</label><div id="e-res"></div>
+    <div class="grid2" style="margin-top:12px">
+      <div><label class="f">Docente</label><input class="in-f" id="e-teacher" value="${esc(r.teacher || "")}"></div>
+      <div class="grid2"><div><label class="f">DNI</label><input class="in-f" id="e-dni" inputmode="numeric" value="${esc(r.dni || "")}" placeholder="Sin puntos"></div><div><label class="f">Teléfono</label><input class="in-f" id="e-phone" value="${esc(r.phone || "")}"></div></div>
+      <div><label class="f">Curso y nivel</label><input class="in-f" id="e-course" value="${esc(r.course || "")}"></div>
+      <div><label class="f">Aula / lugar</label><input class="in-f" id="e-place" value="${esc(r.place || "")}"></div>
+    </div>
+    <div style="margin-top:12px"><label class="f">Planta</label><select class="in-f" id="e-floor"><option value="">—</option><option ${r.floor === "Planta baja" ? "selected" : ""}>Planta baja</option><option ${r.floor === "Planta alta" ? "selected" : ""}>Planta alta</option></select></div>
+    <label class="f" style="margin-top:12px">Comentario</label><textarea class="in-f" id="e-comment">${esc(r.comment || "")}</textarea>
+    <div class="foot"><button class="btn" data-close>Cancelar</button><button class="btn primary" id="e-ok">${isNew ? "Crear reserva" : "Guardar cambios"}</button></div>`, {
+    wide: true,
+    onMount: (m, close) => {
+      let day = [];
+      const draw = () => {
+        const s = $("#e-start", m).value, e = $("#e-end", m).value;
+        $("#e-res", m).innerHTML = `<div class="res-grid">` + A.resources.filter((x) => x.active !== false || sel.has(x.id)).map((x) => {
+          const av = availability(x, day.filter((d) => d.id !== r.id), s, e);
+          const on = sel.has(x.id);
+          const st = s && e ? (av.free === 0 ? `<div class="st busy">Ocupado</div>` : `<div class="st ${av.free < av.total ? "part" : "free"}">${av.free} de ${av.total} libre(s)</div>`) : "";
+          return `<div class="res ${on ? "on" : ""}" data-id="${x.id}" style="padding:8px"><div class="ic" style="font-size:20px">${esc(x.icon || "📦")}</div><div><div class="nm" style="font-size:14px">${esc(x.name)}</div>${st}
+            ${on && (x.quantity || 1) > 1 ? `<div class="qty" data-stop><button type="button" data-q="-1">−</button><b>${sel.get(x.id)}</b><button type="button" data-q="1">+</button></div>` : ""}</div><span class="tick">✓</span></div>`;
+        }).join("") + `</div>`;
+        $$("#e-res .res", m).forEach((el) => {
+          el.onclick = (ev) => { if (ev.target.closest("[data-stop]")) return; sel.has(el.dataset.id) ? sel.delete(el.dataset.id) : sel.set(el.dataset.id, 1); draw(); };
+          $$("[data-q]", el).forEach((b) => (b.onclick = () => { const x = A.resources.find((y) => y.id === el.dataset.id); sel.set(x.id, Math.max(1, Math.min(x.quantity, sel.get(x.id) + +b.dataset.q))); draw(); }));
+        });
+      };
+      const loadDay = async () => { const d = $("#e-date", m).value; day = d ? (await call(`/admin/reservations?from=${d}&to=${d}`).catch(() => ({ reservations: [] }))).reservations : []; draw(); };
+      $("#e-date", m).onchange = loadDay; $("#e-start", m).oninput = draw; $("#e-end", m).oninput = draw;
+      $$("[data-m]", m).forEach((b) => (b.onclick = () => { const x = mods[+b.dataset.m]; $("#e-start", m).value = x.start; if (!$("#e-end", m).value || toMin($("#e-end", m).value) <= toMin(x.start)) $("#e-end", m).value = x.end; else $("#e-end", m).value = toMin(x.end) > toMin($("#e-end", m).value) ? x.end : $("#e-end", m).value; draw(); }));
+      loadDay();
+      $("#e-ok", m).onclick = async () => {
+        const body = { date: $("#e-date", m).value, start: $("#e-start", m).value, end: $("#e-end", m).value, items: [...sel].map(([resourceId, qty]) => ({ resourceId, qty })),
+          teacher: $("#e-teacher", m).value, phone: $("#e-phone", m).value, dni: $("#e-dni", m).value.replace(/\D/g, ""), course: $("#e-course", m).value, place: $("#e-place", m).value, floor: $("#e-floor", m).value, comment: $("#e-comment", m).value };
+        try {
+          if (isNew) await call("/admin/reservations", { method: "POST", body });
+          else await call("/admin/reservations/" + r.id, { method: "PUT", body });
+          toast(isNew ? "Reserva creada" : "Cambios guardados"); close(); reload();
+        } catch (e) { toast(e.message, true); }
+      };
+    },
+  });
+}
+
+/* ---------------- Listado de reservas ---------------- */
+function fillResSelect() { $("#rs-res").innerHTML = `<option value="">Todos</option>` + A.resources.map((r) => `<option value="${r.id}">${esc(r.name)}</option>`).join(""); }
+async function loadList() {
+  $("#rs-body").innerHTML = `<tr><td colspan="6" class="empty"><span class="spin"></span></td></tr>`;
+  try { A.list = (await call(`/admin/reservations?from=${$("#rs-from").value}&to=${$("#rs-to").value}`)).reservations; renderList(); }
+  catch (e) { $("#rs-body").innerHTML = `<tr><td colspan="6" class="empty">${esc(e.message)}</td></tr>`; }
+}
+function filtered() {
+  const st = $("#rs-status").value, rs = $("#rs-res").value, rp = $("#rs-rep").value, q = $("#rs-q").value.trim().toLowerCase();
+  const text = (r) => [r.teacher, r.dni, r.course, r.phone, r.id, r.place, r.comment, r.report && [r.report.subject, r.report.topic, r.report.exitNotes, r.report.roomNotes, ...(r.report.students || []).map((x) => "maquina máquina " + x.machine + " " + x.name)].join(" ")].join(" ").toLowerCase();
+  return A.list.filter((r) => (!st || r.status === st) && (!rs || r.items.some((i) => i.resourceId === rs)) && (!rp || repState(r) === rp) && (!q || text(r).includes(q)));
+}
+function renderList() {
+  const l = filtered();
+  $("#rs-count").textContent = `${l.length} reserva${l.length !== 1 ? "s" : ""}`;
+  $("#rs-body").innerHTML = l.length ? l.map((r) => `<tr data-open="${r.id}" style="cursor:pointer">
+    <td><b>${fmtDate(r.date)}</b></td><td>${r.start}–${r.end}</td><td>${esc(itemsText(r.items, A.resources))}</td>
+    <td>${esc(r.teacher)}<div class="small muted">${r.dni ? "DNI " + esc(r.dni) + " · " : ""}${esc(r.phone || "")}</div></td><td>${esc(r.course)}<div class="small muted">${esc([r.place, r.floor].filter(Boolean).join(" – "))}</div></td>
+    <td><span class="badge ${r.status}">${r.status}</span>${repBadge(r)}</td></tr>`).join("") : `<tr><td colspan="6" class="empty">Sin resultados.</td></tr>`;
+  $$("#rs-body [data-open]").forEach((tr) => (tr.onclick = () => detail(A.list.find((x) => x.id === tr.dataset.open), loadList)));
+}
+["rs-from", "rs-to"].forEach((id) => ($("#" + id).onchange = loadList));
+["rs-status", "rs-res", "rs-rep"].forEach((id) => ($("#" + id).onchange = renderList));
+$("#rs-q").oninput = renderList;
+function downloadCSV(name, cols, rows) {
+  const q = (v) => `"${String(v ?? "").replace(/"/g, '""')}"`;
+  const blob = new Blob(["\ufeff" + [cols, ...rows].map((r) => r.map(q).join(";")).join("\r\n")], { type: "text/csv;charset=utf-8" });
+  const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = name; a.click();
+}
+$("#rs-csv-rep").onclick = () => {
+  const list = filtered().filter((r) => r.report);
+  if (!list.length) return toast("No hay reportes en el rango/filtro elegido.", true);
+  const rows = [];
+  for (const r of list) {
+    const p = r.report, base = [r.date, r.start, r.end, r.teacher, r.dni, r.course, p.subject, p.topic, (p.tools || []).join(", ")];
+    const tail = [p.roomState === "ordenada" ? "Ordenada" : "Con observaciones", p.roomNotes, p.exitNotes, p.faultyMachines, r.id];
+    const studs = p.students?.length ? p.students : [{ machine: "", name: "" }];
+    for (const s of studs) rows.push([...base, s.machine, s.name, ...tail]);
+  }
+  downloadCSV(`reportes_sala_${$("#rs-from").value}_${$("#rs-to").value}.csv`,
+    ["Fecha", "Inicio", "Fin", "Docente", "DNI", "Curso", "Materia", "Tema", "Herramientas", "Máquina", "Alumno", "Estado sala al ingresar", "Observaciones al ingresar", "Novedades al salir", "Máquinas con fallas", "Código reserva"], rows);
+};
+$("#rs-csv").onclick = () => {
+  const cols = ["Código", "Fecha", "Inicio", "Fin", "Recursos", "Docente", "DNI", "Teléfono", "Curso", "Lugar", "Planta", "Comentario", "Estado", "Nota gabinete", "Creada"];
+  const q = (v) => `"${String(v ?? "").replace(/"/g, '""')}"`;
+  const rows = filtered().map((r) => [r.id, r.date, r.start, r.end, r.items.map((i) => resName(i.resourceId) + (i.qty > 1 ? " x" + i.qty : "")).join(" + "), r.teacher, r.dni, r.phone, r.course, r.place, r.floor, r.comment, r.status, r.adminNote, r.createdAt].map(q).join(";"));
+  const blob = new Blob(["﻿" + [cols.map(q).join(";"), ...rows].join("\r\n")], { type: "text/csv;charset=utf-8" });
+  const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = `reservas_${$("#rs-from").value}_${$("#rs-to").value}.csv`; a.click();
+};
+
+/* ---------------- Recursos ---------------- */
+async function renderResources() {
+  try { A.resources = (await call("/admin/resources")).resources; fillResSelect(); } catch (e) { toast(e.message, true); }
+  $("#rc-body").innerHTML = A.resources.map((r) => `<tr>
+    <td style="font-size:22px">${esc(r.icon || "📦")}</td><td><b>${esc(r.name)}</b>${r.requiresReport ? ` <span class="badge">📝 pide reporte${r.machines ? " · " + r.machines + " máq." : ""}</span>` : ""}${r.notes ? `<div class="small muted">${esc(r.notes)}</div>` : ""}</td>
+    <td>${esc(r.category)}</td><td>${esc(r.location || "")}</td><td>${r.quantity}</td>
+    <td>${r.active !== false ? `<span class="badge confirmada">Visible</span>` : `<span class="badge devuelta">Oculto</span>`}</td>
+    <td style="text-align:right;white-space:nowrap"><button class="btn sm" data-edit="${r.id}">✏️ Editar</button></td></tr>`).join("") || `<tr><td colspan="7" class="empty">Sin recursos.</td></tr>`;
+  $$("[data-edit]").forEach((b) => (b.onclick = () => resForm(A.resources.find((x) => x.id === b.dataset.edit))));
+}
+$("#rc-new").onclick = () => resForm({ quantity: 1, active: true, icon: "📦", category: "Tecnología" });
+function resForm(r) {
+  const icons = ["📺", "📽️", "💻", "🔊", "🎤", "📷", "🧪", "🔬", "🎸", "🎹", "🥁", "🏀", "⚽", "🗺️", "🖨️", "🔌", "🏫", "🖥️", "📚", "📦"];
+  const cats = [...new Set(["Tecnología", "Espacios", "Laboratorio", "Música", "Deportes", ...A.resources.map((x) => x.category)])];
+  modal(`<h3>${r.id ? "Editar recurso" : "Nuevo recurso"}</h3>
+    <label class="f">Nombre</label><input class="in-f" id="r-name" value="${esc(r.name || "")}" placeholder="Ej: Proyector Epson">
+    <label class="f" style="margin-top:10px">Ícono</label><div class="chips" id="r-icons">${icons.map((i) => `<button type="button" class="chip ${i === r.icon ? "on" : ""}" data-i="${i}" style="padding:4px 8px;font-size:20px">${i}</button>`).join("")}</div>
+    <div class="grid2" style="margin-top:10px">
+      <div><label class="f">Categoría</label><input class="in-f" id="r-cat" list="r-cats" value="${esc(r.category || "")}"><datalist id="r-cats">${cats.map((c) => `<option value="${esc(c)}">`).join("")}</datalist></div>
+      <div><label class="f">Cantidad de unidades</label><input class="in-f" id="r-qty" type="number" min="1" value="${r.quantity || 1}"></div>
+    </div>
+    <label class="f" style="margin-top:10px">Ubicación</label><input class="in-f" id="r-loc" value="${esc(r.location || "")}" placeholder="Ej: Gabinete – planta baja">
+    <label class="f" style="margin-top:10px">Nota para docentes <span class="opt">(opcional)</span></label><input class="in-f" id="r-notes" value="${esc(r.notes || "")}">
+    <label class="check"><input type="checkbox" id="r-report" ${r.requiresReport ? "checked" : ""}> Pedir <b>reporte de uso</b> al docente (alumnos por máquina, tema, estado de la sala)</label>
+    <div id="r-mach-box" class="${r.requiresReport ? "" : "hide"}" style="margin-top:8px"><label class="f">Cantidad de máquinas <span class="opt">(opcional)</span></label><input class="in-f" id="r-mach" type="number" min="0" value="${r.machines || ""}" style="max-width:140px"></div>
+    <label class="check"><input type="checkbox" id="r-active" ${r.active !== false ? "checked" : ""}> Visible para reservar</label>
+    <div class="foot">${r.id ? `<button class="btn danger" id="r-del" style="margin-right:auto">Eliminar</button>` : ""}<button class="btn" data-close>Cancelar</button><button class="btn primary" id="r-ok">Guardar</button></div>`, {
+    onMount: (m, close) => {
+      let icon = r.icon || "📦";
+      $("#r-report", m).onchange = (e) => $("#r-mach-box", m).classList.toggle("hide", !e.target.checked);
+      $$("#r-icons .chip", m).forEach((b) => (b.onclick = () => { icon = b.dataset.i; $$("#r-icons .chip", m).forEach((x) => x.classList.toggle("on", x === b)); }));
+      $("#r-ok", m).onclick = async () => {
+        const body = { id: r.id, name: $("#r-name", m).value, icon, category: $("#r-cat", m).value, quantity: $("#r-qty", m).value, location: $("#r-loc", m).value, notes: $("#r-notes", m).value, active: $("#r-active", m).checked, requiresReport: $("#r-report", m).checked, machines: $("#r-mach", m).value };
+        try { await call("/admin/resources", { method: r.id ? "PUT" : "POST", body }); toast("Recurso guardado"); close(); renderResources(); } catch (e) { toast(e.message, true); }
+      };
+      $("#r-del", m) && ($("#r-del", m).onclick = async () => {
+        close();
+        if (await confirmBox(`¿Eliminar "${r.name}"? Si solo querés que no se reserve, mejor desmarcá "Visible".`, "Eliminar", true)) {
+          try { await call("/admin/resources/" + r.id, { method: "DELETE" }); toast("Recurso eliminado"); renderResources(); } catch (e) { toast(e.message, true); }
+        }
+      });
+    },
+  });
+}
+
+/* ---------------- Usuarios (IT) ---------------- */
+async function loadUsers() {
+  try {
+    const { users } = await call("/admin/users");
+    $("#us-body").innerHTML = users.map((u) => `<tr><td><b>${esc(u.name)}</b></td><td><span class="code">${esc(u.username)}</span></td>
+      <td>${u.role === "it" ? "Admin IT" : "Administrador"}</td><td>${u.disabled ? `<span class="badge cancelada">Deshabilitado</span>` : `<span class="badge confirmada">Activo</span>`}</td>
+      <td style="text-align:right"><button class="btn sm" data-u="${esc(u.username)}">✏️ Editar</button></td></tr>`).join("") || `<tr><td colspan="5" class="empty">Todavía no creaste usuarios para el gabinete.</td></tr>`;
+    $$("[data-u]").forEach((b) => (b.onclick = () => userForm(users.find((x) => x.username === b.dataset.u))));
+  } catch (e) { toast(e.message, true); }
+}
+$("#us-new").onclick = () => userForm({ role: "admin" });
+function userForm(u) {
+  const isNew = !u.username;
+  modal(`<h3>${isNew ? "Nuevo usuario" : "Editar usuario"}</h3>
+    <label class="f">Nombre</label><input class="in-f" id="u-name" value="${esc(u.name || "")}" placeholder="Ej: Laura (preceptoría)">
+    <label class="f" style="margin-top:10px">Usuario</label><input class="in-f" id="u-user" value="${esc(u.username || "")}" ${isNew ? "" : "disabled"} autocapitalize="none" placeholder="Ej: laura">
+    <label class="f" style="margin-top:10px">Rol</label><select class="in-f" id="u-role"><option value="admin" ${u.role === "admin" ? "selected" : ""}>Administrador (gabinete)</option><option value="it" ${u.role === "it" ? "selected" : ""}>Admin IT</option></select>
+    <label class="f" style="margin-top:10px">${isNew ? "Contraseña" : "Nueva contraseña"} <span class="opt">${isNew ? "(mín. 6)" : "(dejar vacío para no cambiar)"}</span></label><input class="in-f" id="u-pass" type="text" autocomplete="off">
+    ${isNew ? "" : `<label class="check"><input type="checkbox" id="u-dis" ${u.disabled ? "checked" : ""}> Deshabilitado (no puede ingresar)</label>`}
+    <div class="foot">${isNew ? "" : `<button class="btn danger" id="u-del" style="margin-right:auto">Eliminar</button>`}<button class="btn" data-close>Cancelar</button><button class="btn primary" id="u-ok">Guardar</button></div>`, {
+    onMount: (m, close) => {
+      $("#u-ok", m).onclick = async () => {
+        const body = { username: $("#u-user", m).value, name: $("#u-name", m).value, role: $("#u-role", m).value, password: $("#u-pass", m).value || undefined };
+        if (!isNew) body.disabled = $("#u-dis", m).checked;
+        try { await call("/admin/users", { method: isNew ? "POST" : "PUT", body }); toast("Usuario guardado"); close(); loadUsers(); } catch (e) { toast(e.message, true); }
+      };
+      $("#u-del", m) && ($("#u-del", m).onclick = async () => { close(); if (await confirmBox(`¿Eliminar al usuario ${u.username}?`, "Eliminar", true)) { try { await call("/admin/users/" + u.username, { method: "DELETE" }); toast("Usuario eliminado"); loadUsers(); } catch (e) { toast(e.message, true); } } });
+    },
+  });
+}
+
+/* ---------------- Configuración (IT) ---------------- */
+function renderConfig() {
+  const s = A.settings;
+  $("#cf-name").value = s.schoolName; $("#cf-min").value = s.minHoursAdvance; $("#cf-max").value = s.maxDaysAhead;
+  $("#cf-notice").value = s.notice; $("#cf-ds").value = s.dayStart; $("#cf-de").value = s.dayEnd;
+  $("#cf-days").innerHTML = [1, 2, 3, 4, 5, 6, 0].map((d) => `<button type="button" class="chip ${s.weekdays.includes(d) ? "on" : ""}" data-d="${d}" style="text-transform:capitalize">${DIAS[d]}</button>`).join("");
+  $$("#cf-days .chip").forEach((b) => (b.onclick = () => b.classList.toggle("on")));
+  $("#cf-mods").innerHTML = ""; (s.modules || []).forEach(addModRow);
+}
+function addModRow(x = { label: "", start: "", end: "" }) {
+  const d = document.createElement("div"); d.className = "row"; d.style.marginBottom = "8px";
+  d.innerHTML = `<input class="in-f mm-l" placeholder="Nombre (ej: 1ª hora)" value="${esc(x.label)}" style="flex:1;min-width:140px"><input type="time" class="in-f mm-s" value="${x.start}" style="width:130px"><input type="time" class="in-f mm-e" value="${x.end}" style="width:130px"><button type="button" class="btn sm danger">✕</button>`;
+  d.querySelector("button").onclick = () => d.remove();
+  $("#cf-mods").appendChild(d);
+}
+$("#cf-addmod").onclick = () => { const rows = $$("#cf-mods .row"); const last = rows.at(-1); addModRow({ label: `${rows.length + 1}ª hora`, start: last ? $(".mm-e", last).value : "", end: "" }); };
+$("#cf-form").onsubmit = async (e) => {
+  e.preventDefault();
+  const body = { schoolName: $("#cf-name").value, minHoursAdvance: $("#cf-min").value, maxDaysAhead: $("#cf-max").value, notice: $("#cf-notice").value,
+    dayStart: $("#cf-ds").value, dayEnd: $("#cf-de").value, weekdays: $$("#cf-days .chip.on").map((b) => +b.dataset.d),
+    modules: $$("#cf-mods .row").map((r) => ({ label: $(".mm-l", r).value, start: $(".mm-s", r).value, end: $(".mm-e", r).value })).filter((x) => x.start && x.end) };
+  try { A.settings = (await call("/admin/settings", { method: "PUT", body })).settings; $("#school").textContent = A.settings.schoolName; toast("Configuración guardada"); renderConfig(); } catch (err) { toast(err.message, true); }
+};
+
+/* ---------------- Inicio ---------------- */
+const sess = store.get("gab-session");
+if (sess && sess.token) start(sess); else $("#login").classList.remove("hide");
+</script>
+</body>
+</html>
